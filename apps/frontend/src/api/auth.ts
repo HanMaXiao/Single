@@ -38,7 +38,11 @@ export async function establishSession(accessToken: string): Promise<void> {
 }
 
 export async function clearSession(): Promise<void> {
-  await fetch("/auth/session", {
+  const response = await fetch("/auth/session", {
     method: "DELETE"
   });
+
+  if (!response.ok) {
+    throw new Error("Unable to clear session");
+  }
 }
