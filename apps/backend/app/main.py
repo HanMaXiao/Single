@@ -21,7 +21,7 @@ logging.basicConfig(
 
 
 def generate_operation_id(route: APIRoute) -> str:
-    tag = route.tags[0] if route.tags else "default"
+    tag = route.tags[0] if len(route.tags) > 0 else "default"
     return f"{tag}_{route.name}"
 
 
