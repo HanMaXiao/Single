@@ -29,7 +29,7 @@ apps/
       middleware/auth.py  # token 中间件与鉴权依赖
       models/             # Tortoise ORM 模型
       schemas/            # 请求与响应结构
-    scripts/init_db.py    # 初始化数据库和默认账号
+    scripts/init_db.py    # 初始化数据库结构
   frontend/
     src/
       api/                # API 函数、生成类型、Fetch 客户端
@@ -43,7 +43,7 @@ turbo.json
 
 ## ⚙️ 环境变量
 
-复制模板并按实际环境修改：
+复制模板并按实际环境修改。`POSTGRES_PASSWORD` 和 `JWT_SECRET_KEY` 不提供源码内默认值，必须在 `.env` 中设置：
 
 ```powershell
 Copy-Item .env.example .env
@@ -51,11 +51,14 @@ Copy-Item .env.example .env
 
 | 变量 | 示例 | 说明 |
 | --- | --- | --- |
-| `POSTGRES_HOST` | `8.218.40.52` | PostgreSQL 地址 |
-| `POSTGRES_PORT` | `5432` | PostgreSQL 端口 |
-| `POSTGRES_USER` | `solo` | 数据库用户名 |
-| `POSTGRES_PASSWORD` | `******` | 数据库密码 |
-| `POSTGRES_DB` | `solo_db` | 数据库名称 |
+| `POSTGRES_HOST` | `postgres` | PostgreSQL 地址；Docker 本地默认使用内置 PostgreSQL 服务 |
+| `POSTGRES_PORT` | `5432` | 后端连接 PostgreSQL 的端口 |
+| `POSTGRES_BIND_HOST` | `127.0.0.1` | 本地 PostgreSQL 映射到宿主机的绑定地址 |
+| `POSTGRES_HOST_PORT` | `5432` | 本地 PostgreSQL 映射到宿主机的端口 |
+| `POSTGRES_USER` | `solo_local` | 数据库用户名；必须通过环境变量提供 |
+| `POSTGRES_PASSWORD` | 空 | 数据库密码；必须通过环境变量提供 |
+| `POSTGRES_DB` | `solo_local` | 数据库名称；必须通过环境变量提供 |
+| `JWT_SECRET_KEY` | 空 | token 签名密钥；必须通过环境变量提供，至少 32 个字符 |
 | `FRONTEND_PORT` | `3000` | 前端映射到宿主机的端口 |
 | `BACKEND_PORT` | `8000` | 后端映射到宿主机的端口 |
 | `BACKEND_BIND_HOST` | `127.0.0.1` | 后端默认只绑定本机，避免公网暴露 |
@@ -87,11 +90,7 @@ docker compose up --build -d
 | OpenAPI JSON | http://localhost:8000/openapi.json |
 | 健康检查 | http://localhost:8000/api/v1/health |
 
-默认账号：
-
-```text
-admin / admin123
-```
+系统不会自动创建默认账号。首次进入登录页时，输入自定义用户名和密码后点击“创建当前账号”，再使用该账号登录。
 
 ### 停止服务
 
@@ -383,5 +382,5 @@ Invoke-WebRequest -UseBasicParsing `
   -Method Post `
   -Uri http://localhost:3000/api/v1/auth/login `
   -ContentType "application/json" `
-  -Body '{"username":"admin","password":"admin123"}'
+  -Body '{"username":"<your-username>","password":"<your-password>"}'
 ```

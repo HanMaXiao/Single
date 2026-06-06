@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { login, register } from "@/api/auth";
@@ -10,9 +11,9 @@ import { getHttpErrorMessage } from "@/types/http";
 
 export default function Home() {
   const router = useRouter();
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
-  const [message, setMessage] = useState("使用内置账号 admin / admin123 登录体验控制台");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("请输入账号登录，或创建一个新账号。");
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
