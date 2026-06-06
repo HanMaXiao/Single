@@ -7,6 +7,8 @@
     "apps/frontend"
   ],
   "scripts": {
+    "api:openapi": "python apps/backend/scripts/export_openapi.py",
+    "api:generate": "pnpm api:openapi && pnpm --filter next-frontend api:generate",
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "start": "turbo run start",

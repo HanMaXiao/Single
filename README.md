@@ -1,13 +1,13 @@
 # FastAPI + Next.js 单仓库项目
 
-这是一个 `FastAPI + Next.js + Docker Compose` 的单仓库项目骨架。后端使用 FastAPI、Tortoise ORM、PostgreSQL、Gunicorn/Uvicorn Worker；前端使用 Next.js、axios、pnpm、Turborepo。
+这是一个 `FastAPI + Next.js + Docker Compose` 的单仓库项目骨架。后端使用 FastAPI、Tortoise ORM、PostgreSQL、Gunicorn/Uvicorn Worker；前端使用 Next.js、openapi-ts-fetch、pnpm、Turborepo。
 
 ## 📦 技术栈
 
 | 模块 | 技术 | 说明 |
 | --- | --- | --- |
 | 前端 | Next.js 15 | 页面与 API 代理 |
-| 前端请求 | axios | 统一封装 HTTP 请求，自动携带 token |
+| 前端请求 | openapi-ts-fetch | 基于 OpenAPI 类型的 Fetch 客户端，自动携带 token |
 | 前端包管理 | pnpm | workspace 依赖安装 |
 | 构建工具 | Turborepo | 单仓库任务编排与缓存 |
 | 后端 | FastAPI | RESTful API 服务 |
@@ -32,9 +32,8 @@ apps/
     scripts/init_db.py    # 初始化数据库和默认账号
   frontend/
     src/
-      api/                # API 函数、请求参数、响应类型
+      api/                # API 函数、生成类型、Fetch 客户端
       configs/            # 前端环境配置
-      lib/http.ts         # axios 全局封装
       types/              # 通用类型
 docker-compose.yml
 package.json
@@ -85,6 +84,7 @@ docker compose up --build -d
 | --- | --- |
 | 前端页面 | http://localhost:3000 |
 | 后端文档 | http://localhost:8000/docs |
+| OpenAPI JSON | http://localhost:8000/openapi.json |
 | 健康检查 | http://localhost:8000/api/v1/health |
 
 默认账号：
@@ -207,8 +207,9 @@ async def get_me(current_user: User = Depends(require_auth)):
 
 | 文件 | 说明 |
 | --- | --- |
-| `apps/frontend/src/lib/http.ts` | axios 实例、token header、响应拦截 |
-| `apps/frontend/src/api/types.ts` | 请求参数与响应类型 |
+| `apps/frontend/src/api/client.ts` | openapi-ts-fetch 实例、token header 中间件 |
+| `apps/frontend/src/api/generated/schema.ts` | 从 OpenAPI 自动生成的 TypeScript 类型 |
+| `apps/frontend/src/api/types.ts` | 基于生成类型导出的业务别名 |
 | `apps/frontend/src/api/auth.ts` | 登录、注册接口 |
 | `apps/frontend/src/api/user.ts` | 用户接口 |
 
@@ -221,6 +222,25 @@ try {
   setMessage(getHttpErrorMessage(error));
 }
 ```
+
+## 🧾 Swagger 与客户端生成
+
+FastAPI 会在后端服务启动后暴露 Swagger UI 和 OpenAPI JSON：
+
+```text
+http://localhost:8000/docs
+http://localhost:8000/openapi.json
+```
+
+新增或修改后端接口后，重新生成前端类型和 Fetch 客户端：
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r apps/backend/requirements.txt
+pnpm api:generate
+```
+
+生成流程会先导出 `apps/frontend/src/api/generated/openapi.json`，再用 `openapi-typescript` 生成 `apps/frontend/src/api/generated/schema.ts`。业务代码通过 `openapi-ts-fetch` 调用接口，不再手写前后端重复 DTO。
 
 ## 🧩 Redis 说明
 

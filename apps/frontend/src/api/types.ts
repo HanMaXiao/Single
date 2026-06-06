@@ -1,21 +1,8 @@
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
+import type { components } from "@/api/generated/schema";
 
-export interface RegisterRequest {
-  username: string;
-  password: string;
-}
-
-export interface TokenData {
-  access_token: string;
-  token_type: "Bearer";
-}
-
-export interface User {
-  id: number;
-  username: string;
-  is_active: boolean;
-  created_at: string;
-}
+export type LoginRequest = components["schemas"]["LoginRequest"];
+export type RegisterRequest = components["schemas"]["RegisterRequest"];
+export type TokenData = components["schemas"]["TokenData"];
+export type User = components["schemas"]["UserOut"];
+export type LoginResponse = components["schemas"]["ApiResponse_TokenData_"];
+export type UserResponse = components["schemas"]["ApiResponse_UserOut_"];

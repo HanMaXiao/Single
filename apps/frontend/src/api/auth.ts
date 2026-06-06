@@ -1,21 +1,24 @@
-import { http } from "@/lib/http";
-import type { ApiResponse } from "@/types/http";
-import type { LoginRequest, RegisterRequest, TokenData, User } from "@/api/types";
+import { apiFetcher } from "@/api/client";
+import type {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  UserResponse
+} from "@/api/types";
+
+const loginRequest = apiFetcher.endpoint("/api/v1/auth/login").method("post");
+const registerRequest = apiFetcher.endpoint("/api/v1/auth/register").method("post");
 
 export async function login(
   payload: LoginRequest
-): Promise<ApiResponse<TokenData>> {
-  return http.post<unknown, ApiResponse<TokenData>, LoginRequest>(
-    "/api/v1/auth/login",
-    payload
-  );
+): Promise<LoginResponse> {
+  const response = await loginRequest({ body: payload });
+  return response.data;
 }
 
 export async function register(
   payload: RegisterRequest
-): Promise<ApiResponse<User>> {
-  return http.post<unknown, ApiResponse<User>, RegisterRequest>(
-    "/api/v1/auth/register",
-    payload
-  );
+): Promise<UserResponse> {
+  const response = await registerRequest({ body: payload });
+  return response.data;
 }

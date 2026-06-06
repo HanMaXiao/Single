@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { login, register } from "@/api/auth";
 import { getCurrentUser } from "@/api/user";
-import { TOKEN_STORAGE_KEY } from "@/lib/http";
+import { TOKEN_STORAGE_KEY } from "@/api/client";
 import { getHttpErrorMessage } from "@/types/http";
 
 export default function Home() {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { TOKEN_STORAGE_KEY } from "@/lib/http";
+import { TOKEN_STORAGE_KEY } from "@/api/client";
 
 const services = [
   {

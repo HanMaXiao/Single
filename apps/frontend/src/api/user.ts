@@ -1,7 +1,11 @@
-import { http } from "@/lib/http";
-import type { ApiResponse } from "@/types/http";
-import type { User } from "@/api/types";
+import { apiFetcher } from "@/api/client";
+import type { UserResponse } from "@/api/types";
 
-export async function getCurrentUser(): Promise<ApiResponse<User>> {
-  return http.get<unknown, ApiResponse<User>>("/api/v1/users/me");
+const getCurrentUserRequest = apiFetcher
+  .endpoint("/api/v1/users/me")
+  .method("get");
+
+export async function getCurrentUser(): Promise<UserResponse> {
+  const response = await getCurrentUserRequest({});
+  return response.data;
 }
