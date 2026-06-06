@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "api:generate": "openapi-typescript src/api/generated/openapi.json --output src/api/generated/schema.ts",
-    "dev": "next dev --turbo",
-    "build": "next build",
+    "dev": "pnpm --workspace-root api:generate && next dev --turbo",
+    "build": "pnpm --workspace-root api:generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "pnpm --workspace-root api:check && next lint"
   },
   "dependencies": {
     "next": "15.1.4",

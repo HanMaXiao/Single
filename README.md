@@ -147,6 +147,8 @@ pnpm install
 pnpm build --filter=next-frontend
 ```
 
+前端构建会先从 FastAPI 导出 OpenAPI，并重新生成 `apps/frontend/src/api/generated/schema.ts`。
+
 本地前端开发：
 
 ```powershell
@@ -231,7 +233,7 @@ http://localhost:8000/docs
 http://localhost:8000/openapi.json
 ```
 
-新增或修改后端接口后，重新生成前端类型和 Fetch 客户端：
+新增或修改后端接口后，可以手动重新生成前端类型和 Fetch 客户端：
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -239,7 +241,7 @@ python -m pip install -r apps/backend/requirements.txt
 pnpm api:generate
 ```
 
-生成流程会先导出 `apps/frontend/src/api/generated/openapi.json`，再用 `openapi-typescript` 生成 `apps/frontend/src/api/generated/schema.ts`。业务代码通过 `openapi-ts-fetch` 调用接口，不再手写前后端重复 DTO。
+生成流程会先导出 `apps/frontend/src/api/generated/openapi.json`，再用 `openapi-typescript` 生成 `apps/frontend/src/api/generated/schema.ts`。`pnpm build --filter=next-frontend` 和 `pnpm dev --filter=next-frontend` 会自动执行这一步；`pnpm lint --filter=next-frontend` 会重新生成并通过 Git diff 验证生成文件已提交。业务代码通过 `openapi-ts-fetch` 调用接口，不再手写前后端重复 DTO。
 
 ## 🧩 Redis 说明
 

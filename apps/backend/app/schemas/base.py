@@ -8,7 +8,7 @@ T = TypeVar("T")
 
 class ApiResponse(BaseModel, Generic[T]):
     code: int = 0
-    data: T | None = None
+    data: T
     msg: str = "ok"
 
 
