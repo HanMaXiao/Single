@@ -4,7 +4,7 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { login, register } from "@/api/auth";
+import { establishSession, login, register } from "@/api/auth";
 import { getCurrentUser } from "@/api/user";
 import { TOKEN_STORAGE_KEY } from "@/api/client";
 import { getHttpErrorMessage } from "@/types/http";
@@ -24,9 +24,11 @@ export default function Home() {
       const response = await login({ username, password });
       window.localStorage.setItem(TOKEN_STORAGE_KEY, response.data.access_token);
       await getCurrentUser();
+      await establishSession(response.data.access_token);
       setMessage("登录成功，正在进入 Hyperspace 控制台");
       router.push("/dashboard");
     } catch (error) {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       setMessage(getHttpErrorMessage(error));
     } finally {
       setIsLoading(false);

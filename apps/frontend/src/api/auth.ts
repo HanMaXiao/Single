@@ -22,3 +22,23 @@ export async function register(
   const response = await registerRequest({ body: payload });
   return response.data;
 }
+
+export async function establishSession(accessToken: string): Promise<void> {
+  const response = await fetch("/auth/session", {
+    body: JSON.stringify({ accessToken }),
+    headers: {
+      "Content-Type": "application/json"
+    },
+    method: "POST"
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to establish authenticated session");
+  }
+}
+
+export async function clearSession(): Promise<void> {
+  await fetch("/auth/session", {
+    method: "DELETE"
+  });
+}
