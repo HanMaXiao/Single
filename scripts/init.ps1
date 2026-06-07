@@ -30,4 +30,4 @@ docker compose up -d
 
 Write-Host "Frontend: http://localhost:3000"
 Write-Host "Backend:  http://localhost:8000/docs"
-Write-Host "No default account is created. Register on the login page, or set ADMIN_USERNAME and ADMIN_PASSWORD in .env before starting."
+Write-Host "No default account is created. Set ADMIN_USERNAME and ADMIN_PASSWORD, or intentionally enable local self-registration with ENABLE_SELF_REGISTRATION=true and NEXT_PUBLIC_ENABLE_SELF_REGISTRATION=true."

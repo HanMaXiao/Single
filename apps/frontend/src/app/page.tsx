@@ -1,20 +1,23 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { FormEvent, ReactElement } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { establishSession, login, register } from "@/api/auth";
 import { getCurrentUser } from "@/api/user";
 import { TOKEN_STORAGE_KEY } from "@/api/client";
+import { env } from "@/configs/env";
 import { getHttpErrorMessage } from "@/types/http";
 
-export default function Home() {
+export default function Home(): ReactElement {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState(
-    "请输入 .env 中配置的管理员账号，或为本地开发创建一个新账号。"
+    env.enableSelfRegistration
+      ? "请输入 .env 中配置的管理员账号，或为本地开发创建一个新账号。"
+      : "请输入 .env 中配置的管理员账号。"
   );
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,6 +41,11 @@ export default function Home() {
   }
 
   async function handleRegister() {
+    if (!env.enableSelfRegistration) {
+      setMessage("本地账号创建未启用。");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -120,14 +128,16 @@ export default function Home() {
             {isLoading ? "处理中..." : "登录 Hyperspace"}
           </button>
 
-          <button
-            className="secondary-button"
-            disabled={isLoading}
-            type="button"
-            onClick={handleRegister}
-          >
-            创建本地账号
-          </button>
+          {env.enableSelfRegistration ? (
+            <button
+              className="secondary-button"
+              disabled={isLoading}
+              type="button"
+              onClick={handleRegister}
+            >
+              创建本地账号
+            </button>
+          ) : null}
         </form>
 
         <div className="message-box">
