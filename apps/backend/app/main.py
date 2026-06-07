@@ -9,7 +9,8 @@ from fastapi.routing import APIRoute
 
 from app.api.v1.routers import auth, health, users
 from app.configs.settings import settings
-from app.core.database import close_database, init_database
+from app.core.bootstrap import bootstrap_backend
+from app.core.database import close_database
 from app.middleware.auth import AuthTokenMiddleware
 from app.middleware.request_log import RequestLogMiddleware
 
@@ -27,7 +28,7 @@ def generate_operation_id(route: APIRoute) -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    await init_database()
+    await bootstrap_backend()
     yield
     await close_database()
 

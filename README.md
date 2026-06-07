@@ -29,7 +29,7 @@ apps/
       middleware/auth.py  # token 中间件与鉴权依赖
       models/             # Tortoise ORM 模型
       schemas/            # 请求与响应结构
-    scripts/init_db.py    # 初始化数据库结构
+    scripts/init_db.py    # 初始化数据库结构与可选账号种子
   frontend/
     src/
       api/                # API 函数、生成类型、Fetch 客户端
@@ -43,10 +43,16 @@ turbo.json
 
 ## ⚙️ 环境变量
 
-复制模板并按实际环境修改。`POSTGRES_PASSWORD` 和 `JWT_SECRET_KEY` 不提供源码内默认值，必须在 `.env` 中设置：
+复制模板并按实际环境修改。`POSTGRES_PASSWORD` 和 `JWT_SECRET_KEY` 不提供源码内默认值，必须在 `.env` 中设置。可选的管理员种子账号也只从 `.env` 读取，不在源码中提供默认账号或默认密码：
 
 ```powershell
 Copy-Item .env.example .env
+```
+
+本地开发可以用初始化脚本创建 `.env` 并自动生成数据库密码和 JWT 密钥：
+
+```powershell
+.\scripts\init.ps1
 ```
 
 | 变量 | 示例 | 说明 |
@@ -59,6 +65,8 @@ Copy-Item .env.example .env
 | `POSTGRES_PASSWORD` | 空 | 数据库密码；必须通过环境变量提供 |
 | `POSTGRES_DB` | `solo_local` | 数据库名称；必须通过环境变量提供 |
 | `JWT_SECRET_KEY` | 空 | token 签名密钥；必须通过环境变量提供，至少 32 个字符 |
+| `ADMIN_USERNAME` | 空 | 可选管理员种子账号；与 `ADMIN_PASSWORD` 同时设置才会创建或更新 |
+| `ADMIN_PASSWORD` | 空 | 可选管理员种子密码；与 `ADMIN_USERNAME` 同时设置才会创建或更新 |
 | `FRONTEND_PORT` | `3000` | 前端映射到宿主机的端口 |
 | `BACKEND_PORT` | `8000` | 后端映射到宿主机的端口 |
 | `BACKEND_BIND_HOST` | `127.0.0.1` | 后端默认只绑定本机，避免公网暴露 |
@@ -71,7 +79,7 @@ Copy-Item .env.example .env
 ### 一键启动
 
 ```powershell
-cd D:\project\demo\solo
+cd D:\XiaoProject\Single
 docker compose up --build
 ```
 
@@ -90,7 +98,7 @@ docker compose up --build -d
 | OpenAPI JSON | http://localhost:8000/openapi.json |
 | 健康检查 | http://localhost:8000/api/v1/health |
 
-系统不会自动创建默认账号。首次进入登录页时，输入自定义用户名和密码后点击“创建当前账号”，再使用该账号登录。
+系统不会自动创建默认账号。需要预置管理员账号时，在 `.env` 中设置 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 后启动；后端启动时会创建该账号，若账号已存在则更新密码并启用账号。两个变量都留空时不会创建任何账号，本地开发可以在登录页输入自定义用户名和密码后点击“创建本地账号”，再使用该账号登录。
 
 ### 停止服务
 

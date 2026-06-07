@@ -1,7 +1,8 @@
 from functools import lru_cache
+from typing import Self
 from urllib.parse import quote_plus
 
-from pydantic import Field
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,12 +29,25 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
 
+    admin_username: str | None = Field(default=None, min_length=3, max_length=64)
+    admin_password: SecretStr | None = Field(default=None, min_length=6, max_length=128)
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
+        env_ignore_empty=True,
         case_sensitive=False,
         extra="ignore",
     )
+
+    @model_validator(mode="after")
+    def validate_admin_seed_settings(self) -> Self:
+        if (self.admin_username is None) != (self.admin_password is None):
+            raise ValueError(
+                "ADMIN_USERNAME and ADMIN_PASSWORD must be set together"
+            )
+
+        return self
 
     @property
     def database_url(self) -> str:

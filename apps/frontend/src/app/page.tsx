@@ -13,7 +13,9 @@ export default function Home() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("请输入账号登录，或创建一个新账号。");
+  const [message, setMessage] = useState(
+    "请输入 .env 中配置的管理员账号，或为本地开发创建一个新账号。"
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
@@ -124,7 +126,7 @@ export default function Home() {
             type="button"
             onClick={handleRegister}
           >
-            创建当前账号
+            创建本地账号
           </button>
         </form>
 
