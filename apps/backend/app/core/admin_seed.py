@@ -16,6 +16,7 @@ async def seed_admin_user_from_environment() -> User | None:
             username=admin_username,
             hashed_password=hash_password(password),
             is_active=True,
+            role="admin",
         )
 
     fields_to_update: list[str] = []
@@ -26,6 +27,10 @@ async def seed_admin_user_from_environment() -> User | None:
     if not user.is_active:
         user.is_active = True
         fields_to_update.append("is_active")
+
+    if user.role != "admin":
+        user.role = "admin"
+        fields_to_update.append("role")
 
     if len(fields_to_update) == 0:
         return user
