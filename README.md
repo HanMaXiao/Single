@@ -111,6 +111,29 @@ NEXT_PUBLIC_ENABLE_SELF_REGISTRATION=true
 
 账号创建完成后，建议把两个开关改回 `false` 并重启服务。
 
+### 数据库升级：`users.role`
+
+2026-06-07 之前初始化过的数据库可能已经存在 `users` 表，但没有 `role` 列。Tortoise 的 `generate_schemas(safe=True)` 只会安全创建缺失的表，不会修改已有表结构，所以后端启动流程现在包含一个显式、幂等的升级步骤：
+
+```sql
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "role" VARCHAR(32);
+UPDATE "users" SET "role" = 'user' WHERE "role" IS NULL;
+ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'user';
+ALTER TABLE "users" ALTER COLUMN "role" SET NOT NULL;
+```
+
+升级会在后端连接数据库并完成安全建表之后、管理员账号种子逻辑之前执行。已有用户行会保留，缺失的 `role` 会回填为 `user`；如果 `.env` 中配置了 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD`，管理员种子逻辑随后会把该账号的 `role` 设置为 `admin`。
+
+已有环境升级步骤：
+
+```powershell
+docker compose pull
+docker compose up --build -d backend
+docker compose logs -f backend
+```
+
+建议在生产环境升级前备份 PostgreSQL 数据库。升级 SQL 可重复执行；新数据库会直接按当前模型创建 `role` 列，旧数据库会在首次启动新后端时补齐并回填。
+
 ### 停止服务
 
 ```powershell

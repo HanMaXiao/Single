@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { clearSession } from "@/api/auth";
-import { TOKEN_STORAGE_KEY } from "@/api/client";
 
 const services = [
   {
@@ -35,9 +34,8 @@ const metrics = [
 export default function DashboardPage() {
   const router = useRouter();
 
-  async function handleLogout() {
+  async function handleLogout(): Promise<void> {
     await clearSession();
-    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
     router.replace("/");
   }
 

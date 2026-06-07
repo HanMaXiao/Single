@@ -4,9 +4,8 @@ import type { FormEvent, ReactElement } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { establishSession, login, register } from "@/api/auth";
+import { clearSession, establishSession, login, register } from "@/api/auth";
 import { getCurrentUser } from "@/api/user";
-import { TOKEN_STORAGE_KEY } from "@/api/client";
 import { env } from "@/configs/env";
 import { getHttpErrorMessage } from "@/types/http";
 
@@ -21,26 +20,33 @@ export default function Home(): ReactElement {
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  async function clearSessionSilently(): Promise<void> {
+    try {
+      await clearSession();
+    } catch {
+      return;
+    }
+  }
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setIsLoading(true);
 
     try {
       const response = await login({ username, password });
-      window.localStorage.setItem(TOKEN_STORAGE_KEY, response.data.access_token);
-      await getCurrentUser();
       await establishSession(response.data.access_token);
+      await getCurrentUser();
       setMessage("登录成功，正在进入 Hyperspace 控制台");
       router.push("/dashboard");
     } catch (error) {
-      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      await clearSessionSilently();
       setMessage(getHttpErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleRegister() {
+  async function handleRegister(): Promise<void> {
     if (!env.enableSelfRegistration) {
       setMessage("本地账号创建未启用。");
       return;
