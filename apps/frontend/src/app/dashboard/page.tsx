@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { TOKEN_STORAGE_KEY } from "@/lib/http";
+import { clearSession } from "@/api/auth";
+import { TOKEN_STORAGE_KEY } from "@/api/client";
 
 const services = [
   {
@@ -31,8 +33,12 @@ const metrics = [
 ];
 
 export default function DashboardPage() {
-  function handleLogout() {
+  const router = useRouter();
+
+  async function handleLogout() {
+    await clearSession();
     window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+    router.replace("/");
   }
 
   return (
@@ -46,9 +52,9 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        <Link className="text-button" href="/" onClick={handleLogout}>
+        <button className="text-button" type="button" onClick={handleLogout}>
           退出登录
-        </Link>
+        </button>
       </header>
 
       <section className="dashboard-hero">

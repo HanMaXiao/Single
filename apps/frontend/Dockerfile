@@ -19,10 +19,15 @@ ARG INTERNAL_API_BASE_URL=http://backend:8000
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ENV INTERNAL_API_BASE_URL=${INTERNAL_API_BASE_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN apk add --no-cache python3 py3-pip
 COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/apps/frontend/node_modules ./apps/frontend/node_modules
 COPY --from=deps /repo/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY package.json pnpm-workspace.yaml turbo.json .npmrc ./
+COPY scripts ./scripts
+COPY apps/backend/requirements.txt ./apps/backend/requirements.txt
+RUN python3 -m pip install --break-system-packages -r apps/backend/requirements.txt
+COPY apps/backend ./apps/backend
 COPY apps/frontend ./apps/frontend
 RUN pnpm turbo run build --filter=next-frontend
 

@@ -3,19 +3,20 @@ from tortoise import Tortoise
 from app.configs.settings import settings
 
 
-TORTOISE_ORM = {
-    "connections": {"default": settings.database_url},
-    "apps": {
-        "models": {
-            "models": ["app.models.user"],
-            "default_connection": "default",
-        }
-    },
-}
+def get_tortoise_orm_config() -> dict[str, object]:
+    return {
+        "connections": {"default": settings.database_url},
+        "apps": {
+            "models": {
+                "models": ["app.models.user"],
+                "default_connection": "default",
+            }
+        },
+    }
 
 
 async def init_database() -> None:
-    await Tortoise.init(config=TORTOISE_ORM)
+    await Tortoise.init(config=get_tortoise_orm_config())
     if settings.db_generate_schemas:
         await Tortoise.generate_schemas(safe=True)
 

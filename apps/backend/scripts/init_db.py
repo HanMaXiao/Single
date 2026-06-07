@@ -1,17 +1,11 @@
 import asyncio
 
-from app.core.database import close_database, init_database
-from app.core.security import hash_password
-from app.models.user import User
+from app.core.bootstrap import bootstrap_backend
+from app.core.database import close_database
 
 
 async def main() -> None:
-    await init_database()
-
-    admin = await User.filter(username="admin").first()
-    if admin is None:
-        await User.create(username="admin", hashed_password=hash_password("admin123"))
-
+    await bootstrap_backend()
     await close_database()
 
 

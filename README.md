@@ -1,13 +1,13 @@
 # FastAPI + Next.js 单仓库项目
 
-这是一个 `FastAPI + Next.js + Docker Compose` 的单仓库项目骨架。后端使用 FastAPI、Tortoise ORM、PostgreSQL、Gunicorn/Uvicorn Worker；前端使用 Next.js、axios、pnpm、Turborepo。
+这是一个 `FastAPI + Next.js + Docker Compose` 的单仓库项目骨架。后端使用 FastAPI、Tortoise ORM、PostgreSQL、Gunicorn/Uvicorn Worker；前端使用 Next.js、openapi-ts-fetch、pnpm、Turborepo。
 
 ## 📦 技术栈
 
 | 模块 | 技术 | 说明 |
 | --- | --- | --- |
 | 前端 | Next.js 15 | 页面与 API 代理 |
-| 前端请求 | axios | 统一封装 HTTP 请求，自动携带 token |
+| 前端请求 | openapi-ts-fetch | 基于 OpenAPI 类型的 Fetch 客户端，自动携带 token |
 | 前端包管理 | pnpm | workspace 依赖安装 |
 | 构建工具 | Turborepo | 单仓库任务编排与缓存 |
 | 后端 | FastAPI | RESTful API 服务 |
@@ -29,12 +29,11 @@ apps/
       middleware/auth.py  # token 中间件与鉴权依赖
       models/             # Tortoise ORM 模型
       schemas/            # 请求与响应结构
-    scripts/init_db.py    # 初始化数据库和默认账号
+    scripts/init_db.py    # 初始化数据库结构与可选账号种子
   frontend/
     src/
-      api/                # API 函数、请求参数、响应类型
+      api/                # API 函数、生成类型、Fetch 客户端
       configs/            # 前端环境配置
-      lib/http.ts         # axios 全局封装
       types/              # 通用类型
 docker-compose.yml
 package.json
@@ -44,19 +43,30 @@ turbo.json
 
 ## ⚙️ 环境变量
 
-复制模板并按实际环境修改：
+复制模板并按实际环境修改。`POSTGRES_PASSWORD` 和 `JWT_SECRET_KEY` 不提供源码内默认值，必须在 `.env` 中设置。可选的管理员种子账号也只从 `.env` 读取，不在源码中提供默认账号或默认密码：
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
+本地开发可以用初始化脚本创建 `.env` 并自动生成数据库密码和 JWT 密钥：
+
+```powershell
+.\scripts\init.ps1
+```
+
 | 变量 | 示例 | 说明 |
 | --- | --- | --- |
-| `POSTGRES_HOST` | `8.218.40.52` | PostgreSQL 地址 |
-| `POSTGRES_PORT` | `5432` | PostgreSQL 端口 |
-| `POSTGRES_USER` | `solo` | 数据库用户名 |
-| `POSTGRES_PASSWORD` | `******` | 数据库密码 |
-| `POSTGRES_DB` | `solo_db` | 数据库名称 |
+| `POSTGRES_HOST` | `postgres` | PostgreSQL 地址；Docker 本地默认使用内置 PostgreSQL 服务 |
+| `POSTGRES_PORT` | `5432` | 后端连接 PostgreSQL 的端口 |
+| `POSTGRES_BIND_HOST` | `127.0.0.1` | 本地 PostgreSQL 映射到宿主机的绑定地址 |
+| `POSTGRES_HOST_PORT` | `5432` | 本地 PostgreSQL 映射到宿主机的端口 |
+| `POSTGRES_USER` | `solo_local` | 数据库用户名；必须通过环境变量提供 |
+| `POSTGRES_PASSWORD` | 空 | 数据库密码；必须通过环境变量提供 |
+| `POSTGRES_DB` | `solo_local` | 数据库名称；必须通过环境变量提供 |
+| `JWT_SECRET_KEY` | 空 | token 签名密钥；必须通过环境变量提供，至少 32 个字符 |
+| `ADMIN_USERNAME` | 空 | 可选管理员种子账号；与 `ADMIN_PASSWORD` 同时设置才会创建或更新 |
+| `ADMIN_PASSWORD` | 空 | 可选管理员种子密码；与 `ADMIN_USERNAME` 同时设置才会创建或更新 |
 | `FRONTEND_PORT` | `3000` | 前端映射到宿主机的端口 |
 | `BACKEND_PORT` | `8000` | 后端映射到宿主机的端口 |
 | `BACKEND_BIND_HOST` | `127.0.0.1` | 后端默认只绑定本机，避免公网暴露 |
@@ -69,7 +79,7 @@ Copy-Item .env.example .env
 ### 一键启动
 
 ```powershell
-cd D:\project\demo\solo
+cd D:\XiaoProject\Single
 docker compose up --build
 ```
 
@@ -85,13 +95,10 @@ docker compose up --build -d
 | --- | --- |
 | 前端页面 | http://localhost:3000 |
 | 后端文档 | http://localhost:8000/docs |
+| OpenAPI JSON | http://localhost:8000/openapi.json |
 | 健康检查 | http://localhost:8000/api/v1/health |
 
-默认账号：
-
-```text
-admin / admin123
-```
+系统不会自动创建默认账号。需要预置管理员账号时，在 `.env` 中设置 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 后启动；后端启动时会创建该账号，若账号已存在则更新密码并启用账号。两个变量都留空时不会创建任何账号，本地开发可以在登录页输入自定义用户名和密码后点击“创建本地账号”，再使用该账号登录。
 
 ### 停止服务
 
@@ -147,6 +154,8 @@ corepack enable
 pnpm install
 pnpm build --filter=next-frontend
 ```
+
+前端构建会先从 FastAPI 导出 OpenAPI，并重新生成 `apps/frontend/src/api/generated/schema.ts`。
 
 本地前端开发：
 
@@ -207,8 +216,9 @@ async def get_me(current_user: User = Depends(require_auth)):
 
 | 文件 | 说明 |
 | --- | --- |
-| `apps/frontend/src/lib/http.ts` | axios 实例、token header、响应拦截 |
-| `apps/frontend/src/api/types.ts` | 请求参数与响应类型 |
+| `apps/frontend/src/api/client.ts` | openapi-ts-fetch 实例、token header 中间件 |
+| `apps/frontend/src/api/generated/schema.ts` | 从 OpenAPI 自动生成的 TypeScript 类型 |
+| `apps/frontend/src/api/types.ts` | 基于生成类型导出的业务别名 |
 | `apps/frontend/src/api/auth.ts` | 登录、注册接口 |
 | `apps/frontend/src/api/user.ts` | 用户接口 |
 
@@ -221,6 +231,25 @@ try {
   setMessage(getHttpErrorMessage(error));
 }
 ```
+
+## 🧾 Swagger 与客户端生成
+
+FastAPI 会在后端服务启动后暴露 Swagger UI 和 OpenAPI JSON：
+
+```text
+http://localhost:8000/docs
+http://localhost:8000/openapi.json
+```
+
+新增或修改后端接口后，可以手动重新生成前端类型和 Fetch 客户端：
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r apps/backend/requirements.txt
+pnpm api:generate
+```
+
+生成流程会先导出 `apps/frontend/src/api/generated/openapi.json`，再用 `openapi-typescript` 生成 `apps/frontend/src/api/generated/schema.ts`。`pnpm build --filter=next-frontend` 和 `pnpm dev --filter=next-frontend` 会自动执行这一步；`pnpm lint --filter=next-frontend` 会重新生成并通过 Git diff 验证生成文件已提交。业务代码通过 `openapi-ts-fetch` 调用接口，不再手写前后端重复 DTO。
 
 ## 🧩 Redis 说明
 
@@ -363,5 +392,5 @@ Invoke-WebRequest -UseBasicParsing `
   -Method Post `
   -Uri http://localhost:3000/api/v1/auth/login `
   -ContentType "application/json" `
-  -Body '{"username":"admin","password":"admin123"}'
+  -Body '{"username":"<your-username>","password":"<your-password>"}'
 ```

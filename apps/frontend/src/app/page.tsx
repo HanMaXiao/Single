@@ -1,18 +1,21 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { login, register } from "@/api/auth";
+import { establishSession, login, register } from "@/api/auth";
 import { getCurrentUser } from "@/api/user";
-import { TOKEN_STORAGE_KEY } from "@/lib/http";
+import { TOKEN_STORAGE_KEY } from "@/api/client";
 import { getHttpErrorMessage } from "@/types/http";
 
 export default function Home() {
   const router = useRouter();
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
-  const [message, setMessage] = useState("使用内置账号 admin / admin123 登录体验控制台");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState(
+    "请输入 .env 中配置的管理员账号，或为本地开发创建一个新账号。"
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
@@ -23,9 +26,11 @@ export default function Home() {
       const response = await login({ username, password });
       window.localStorage.setItem(TOKEN_STORAGE_KEY, response.data.access_token);
       await getCurrentUser();
+      await establishSession(response.data.access_token);
       setMessage("登录成功，正在进入 Hyperspace 控制台");
       router.push("/dashboard");
     } catch (error) {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
       setMessage(getHttpErrorMessage(error));
     } finally {
       setIsLoading(false);
@@ -121,7 +126,7 @@ export default function Home() {
             type="button"
             onClick={handleRegister}
           >
-            创建当前账号
+            创建本地账号
           </button>
         </form>
 

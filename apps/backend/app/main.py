@@ -1,13 +1,16 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 import logging
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 
 from app.api.v1.routers import auth, health, users
 from app.configs.settings import settings
-from app.core.database import close_database, init_database
+from app.core.bootstrap import bootstrap_backend
+from app.core.database import close_database
 from app.middleware.auth import AuthTokenMiddleware
 from app.middleware.request_log import RequestLogMiddleware
 
@@ -18,14 +21,30 @@ logging.basicConfig(
 )
 
 
+def generate_operation_id(route: APIRoute) -> str:
+    tag = route.tags[0] if len(route.tags) > 0 else "default"
+    return f"{tag}_{route.name}"
+
+
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_database()
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    await bootstrap_backend()
     yield
     await close_database()
 
 
-app = FastAPI(title=settings.app_name, debug=settings.debug, lifespan=lifespan)
+app = FastAPI(
+    title=settings.app_name,
+    version="0.1.0",
+    description="OpenAPI document for the FastAPI Next monorepo API.",
+    debug=settings.debug,
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+    swagger_ui_parameters={"persistAuthorization": True},
+    generate_unique_id_function=generate_operation_id,
+)
 
 app.add_middleware(
     CORSMiddleware,

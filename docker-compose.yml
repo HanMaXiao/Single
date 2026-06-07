@@ -2,15 +2,13 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: solo-postgres
-    profiles:
-      - local-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${LOCAL_POSTGRES_USER:-solo}
-      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_PASSWORD:-aapTmk6zNkjJkiD4}
-      POSTGRES_DB: ${LOCAL_POSTGRES_DB:-solo_db}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_BIND_HOST:-127.0.0.1}:${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -39,16 +37,18 @@ services:
     container_name: solo-backend
     restart: unless-stopped
     environment:
-      POSTGRES_HOST: ${POSTGRES_HOST:-8.218.40.52}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      POSTGRES_USER: ${POSTGRES_USER:-solo}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aapTmk6zNkjJkiD4}
-      POSTGRES_DB: ${POSTGRES_DB:-solo_db}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
       PYTHONPATH: /app
       REDIS_HOST: ${REDIS_HOST:-host.docker.internal}
       REDIS_PORT: ${REDIS_PORT:-6379}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       DB_GENERATE_SCHEMAS: ${DB_GENERATE_SCHEMAS:-true}
       WEB_CONCURRENCY: ${BACKEND_WORKERS:-2}
       GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-60}
@@ -61,6 +61,9 @@ services:
       gunicorn app.main:app -c gunicorn_conf.py"
     ports:
       - "${BACKEND_BIND_HOST:-127.0.0.1}:${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:

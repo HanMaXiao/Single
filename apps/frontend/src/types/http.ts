@@ -1,21 +1,27 @@
-import type { AxiosError } from "axios";
-
-export interface ApiResponse<T> {
-  code: number;
-  data: T;
-  msg: string;
-}
+import { ApiError } from "@/api/client";
 
 export interface ApiErrorDetail {
-  detail?: string;
+  detail?: string | { msg: string }[];
 }
 
 export function getHttpErrorMessage(error: unknown): string {
-  const axiosError = error as AxiosError<ApiErrorDetail>;
+  if (error instanceof ApiError) {
+    const errorData = error.data as ApiErrorDetail | undefined;
 
-  if (axiosError.response?.data?.detail) {
-    return axiosError.response.data.detail;
+    if (typeof errorData?.detail === "string") {
+      return errorData.detail;
+    }
+
+    if (Array.isArray(errorData?.detail)) {
+      return errorData.detail.map((detail) => detail.msg).join("; ");
+    }
+
+    return error.message || "Request failed";
   }
 
-  return axiosError.message || "Request failed";
+  if (error instanceof Error) {
+    return error.message || "Request failed";
+  }
+
+  return "Request failed";
 }
