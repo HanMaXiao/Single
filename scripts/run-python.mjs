@@ -8,6 +8,11 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDirectory, "..");
 
 const commandArguments = process.argv.slice(2);
+const pythonEnv = {
+  ...process.env,
+  PYTHONUTF8: process.env.PYTHONUTF8 ?? "1",
+  PYTHONIOENCODING: process.env.PYTHONIOENCODING ?? "utf-8",
+};
 
 if (commandArguments.length === 0) {
   console.error("Usage: node scripts/run-python.mjs <script.py> [...args]");
@@ -33,6 +38,7 @@ const resolvePythonCommand = () => {
     if (!path.isAbsolute(candidate)) {
       const probe = spawnSync(candidate, ["--version"], {
         cwd: repoRoot,
+        env: pythonEnv,
         stdio: "ignore",
         shell: false,
       });
@@ -50,6 +56,7 @@ const resolvePythonCommand = () => {
 
 const result = spawnSync(resolvePythonCommand(), commandArguments, {
   cwd: repoRoot,
+  env: pythonEnv,
   stdio: "inherit",
   shell: false,
 });
