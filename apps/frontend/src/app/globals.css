@@ -131,7 +131,7 @@ p {
 
 .hero-copy p,
 .dashboard-hero p,
-.mission-panel p,
+.account-panel p,
 .service-card p,
 .process-band p {
   color: var(--muted);
@@ -152,7 +152,7 @@ p {
 .signal-grid div,
 .metrics-grid div,
 .service-card,
-.mission-panel {
+.account-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.82);
@@ -166,7 +166,7 @@ p {
 
 .signal-grid span,
 .section-title span,
-.mission-panel span,
+.account-panel span,
 .metrics-grid span,
 .process-band span {
   color: var(--accent);
@@ -316,6 +316,28 @@ input:focus {
   margin-bottom: 42px;
 }
 
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.session-summary {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.session-summary span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.session-summary strong {
+  font-size: 15px;
+}
+
 .text-button {
   display: inline-flex;
   align-items: center;
@@ -338,23 +360,51 @@ input:focus {
   font-size: 46px;
 }
 
-.mission-panel {
+.account-panel {
   display: grid;
-  align-content: end;
+  align-content: start;
+  gap: 18px;
   padding: 24px;
   background: #10252b;
   color: #ffffff;
 }
 
-.mission-panel strong {
+.account-panel strong {
   display: block;
-  margin: 12px 0;
   font-size: 22px;
 }
 
-.mission-panel p {
+.account-panel p {
   margin-bottom: 0;
   color: #cbd7d6;
+}
+
+.account-panel dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.account-panel dl div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  padding-top: 12px;
+}
+
+.account-panel dt {
+  color: #cbd7d6;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.account-panel dd {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 800;
+  text-align: right;
 }
 
 .metrics-grid {
@@ -493,5 +543,15 @@ input:focus {
   .dashboard-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .dashboard-header-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .session-summary {
+    text-align: left;
   }
 }

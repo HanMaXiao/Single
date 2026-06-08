@@ -289,6 +289,10 @@
             "type": "string",
             "title": "Username"
           },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
           "is_active": {
             "type": "boolean",
             "title": "Is Active"
@@ -303,6 +307,7 @@
         "required": [
           "id",
           "username",
+          "role",
           "is_active",
           "created_at"
         ],
