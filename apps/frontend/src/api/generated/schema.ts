@@ -156,6 +156,8 @@ export interface components {
             id: number;
             /** Username */
             username: string;
+            /** Role */
+            role: string;
             /** Is Active */
             is_active: boolean;
             /**

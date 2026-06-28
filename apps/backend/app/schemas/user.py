@@ -21,5 +21,6 @@ class TokenData(BaseModel):
 class UserOut(BaseModel):
     id: int
     username: str
+    role: str
     is_active: bool
     created_at: datetime

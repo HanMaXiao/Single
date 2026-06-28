@@ -1,10 +1,14 @@
 "use client";
 
+import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { clearSession } from "@/api/auth";
-import { TOKEN_STORAGE_KEY } from "@/api/client";
+import type { User } from "@/api/types";
+import { getCurrentUser } from "@/api/user";
+import { getHttpErrorMessage } from "@/types/http";
 
 const services = [
   {
@@ -32,12 +36,81 @@ const metrics = [
   ["接口状态", "FastAPI 服务已接入"]
 ];
 
-export default function DashboardPage() {
-  const router = useRouter();
+function getRoleLabel(role: string): string {
+  if (role === "admin") {
+    return "管理员";
+  }
 
-  async function handleLogout() {
+  return "标准成员";
+}
+
+function getAccountState(user: User): string {
+  if (!user.is_active) {
+    return "账号已停用";
+  }
+
+  if (user.role === "admin") {
+    return "管理员权限已启用";
+  }
+
+  return "标准成员权限已启用";
+}
+
+function formatCreatedDate(value: string): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "未知";
+  }
+
+  return new Intl.DateTimeFormat("zh-CN", {
+    dateStyle: "medium"
+  }).format(date);
+}
+
+export default function DashboardPage(): ReactElement {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCurrentUser(): Promise<void> {
+      setIsLoadingUser(true);
+
+      try {
+        const user = await getCurrentUser();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setCurrentUser(user);
+        setErrorMessage("");
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setErrorMessage(getHttpErrorMessage(error));
+      } finally {
+        if (isMounted) {
+          setIsLoadingUser(false);
+        }
+      }
+    }
+
+    void loadCurrentUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function handleLogout(): Promise<void> {
     await clearSession();
-    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
     router.replace("/");
   }
 
@@ -52,26 +125,62 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        <button className="text-button" type="button" onClick={handleLogout}>
-          退出登录
-        </button>
+        <div className="dashboard-header-actions">
+          <div className="session-summary" aria-live="polite">
+            <span>当前账号</span>
+            <strong>{currentUser?.username ?? "验证中"}</strong>
+          </div>
+
+          <button className="text-button" type="button" onClick={handleLogout}>
+            退出登录
+          </button>
+        </div>
       </header>
 
       <section className="dashboard-hero">
         <div>
           <p className="eyebrow">Hyperspace Control Center</p>
-          <h1>AI 智能应用与前沿交互探索平台</h1>
+          <h1>
+            {currentUser
+              ? `欢迎回来，${currentUser.username}`
+              : "AI 智能应用与前沿交互探索平台"}
+          </h1>
           <p>
             我们提供高效可落地的 Agent 智能体应用服务，帮助企业从单点 AI
             工具升级为可持续迭代的智能应用体系。
           </p>
         </div>
-        <div className="mission-panel">
-          <span>Mission</span>
-          <strong>让 AI 应用真正进入业务现场</strong>
-          <p>
-            从需求拆解、智能体设计、接口集成到部署运维，围绕结果交付而不是概念展示。
-          </p>
+        <div className="account-panel" aria-live="polite">
+          <span>Account</span>
+          {isLoadingUser ? (
+            <>
+              <strong>正在读取会话账号</strong>
+              <p>正在通过当前登录会话加载账号状态。</p>
+            </>
+          ) : currentUser ? (
+            <>
+              <strong>{getAccountState(currentUser)}</strong>
+              <dl>
+                <div>
+                  <dt>角色</dt>
+                  <dd>{getRoleLabel(currentUser.role)}</dd>
+                </div>
+                <div>
+                  <dt>账号状态</dt>
+                  <dd>{currentUser.is_active ? "可用" : "停用"}</dd>
+                </div>
+                <div>
+                  <dt>创建时间</dt>
+                  <dd>{formatCreatedDate(currentUser.created_at)}</dd>
+                </div>
+              </dl>
+            </>
+          ) : (
+            <>
+              <strong>无法读取账号状态</strong>
+              <p>{errorMessage || "请重新登录后再试。"}</p>
+            </>
+          )}
         </div>
       </section>
 

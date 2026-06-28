@@ -8,8 +8,43 @@ import {
   validateAccessToken
 } from "@/auth/session";
 
+const API_PATH_PREFIX = "/api/v1/";
+
+function isApiRequest(pathname: string): boolean {
+  return pathname.startsWith(API_PATH_PREFIX);
+}
+
+function createApiRequestResponse(
+  request: NextRequest,
+  accessToken: string | undefined
+): NextResponse {
+  const trimmedAccessToken = accessToken?.trim();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete("Authorization");
+
+  if (!trimmedAccessToken) {
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders
+      }
+    });
+  }
+
+  requestHeaders.set("Authorization", `Bearer ${trimmedAccessToken}`);
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders
+    }
+  });
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const accessToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+
+  if (isApiRequest(request.nextUrl.pathname)) {
+    return createApiRequestResponse(request, accessToken);
+  }
 
   if (!accessToken) {
     return createRedirectToHomeResponse(request);
@@ -28,5 +63,5 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"]
+  matcher: ["/dashboard/:path*", "/api/v1/:path*"]
 };

@@ -67,10 +67,12 @@ Copy-Item .env.example .env
 | `JWT_SECRET_KEY` | 空 | token 签名密钥；必须通过环境变量提供，至少 32 个字符 |
 | `ADMIN_USERNAME` | 空 | 可选管理员种子账号；与 `ADMIN_PASSWORD` 同时设置才会创建或更新 |
 | `ADMIN_PASSWORD` | 空 | 可选管理员种子密码；与 `ADMIN_USERNAME` 同时设置才会创建或更新 |
+| `ENABLE_SELF_REGISTRATION` | `false` | 后端自助注册开关；默认禁用 `/api/v1/auth/register` |
 | `FRONTEND_PORT` | `3000` | 前端映射到宿主机的端口 |
 | `BACKEND_PORT` | `8000` | 后端映射到宿主机的端口 |
 | `BACKEND_BIND_HOST` | `127.0.0.1` | 后端默认只绑定本机，避免公网暴露 |
 | `NEXT_PUBLIC_API_BASE_URL` | 空 | 空表示浏览器使用同源 `/api` |
+| `NEXT_PUBLIC_ENABLE_SELF_REGISTRATION` | `false` | 前端自助注册 UI 开关；默认隐藏“创建本地账号” |
 | `INTERNAL_API_BASE_URL` | `http://backend:8000` | Next.js 在 Docker 内部代理后端 |
 | `NPM_REGISTRY` | `https://registry.npmmirror.com` | 前端依赖安装源 |
 
@@ -98,7 +100,39 @@ docker compose up --build -d
 | OpenAPI JSON | http://localhost:8000/openapi.json |
 | 健康检查 | http://localhost:8000/api/v1/health |
 
-系统不会自动创建默认账号。需要预置管理员账号时，在 `.env` 中设置 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 后启动；后端启动时会创建该账号，若账号已存在则更新密码并启用账号。两个变量都留空时不会创建任何账号，本地开发可以在登录页输入自定义用户名和密码后点击“创建本地账号”，再使用该账号登录。
+系统不会自动创建默认账号，也不会默认开放自助注册。需要预置管理员账号时，在 `.env` 中设置 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 后启动；后端启动时会创建该账号，若账号已存在则更新密码并启用账号。两个变量都留空时不会创建任何账号，`ENABLE_SELF_REGISTRATION` 未显式开启时 `/api/v1/auth/register` 会返回禁用错误，登录页也不会显示“创建本地账号”。
+
+本地开发如需临时创建账号，必须在 `.env` 中同时开启后端和前端开关，然后重新构建/启动服务：
+
+```env
+ENABLE_SELF_REGISTRATION=true
+NEXT_PUBLIC_ENABLE_SELF_REGISTRATION=true
+```
+
+账号创建完成后，建议把两个开关改回 `false` 并重启服务。
+
+### 数据库升级：`users.role`
+
+2026-06-07 之前初始化过的数据库可能已经存在 `users` 表，但没有 `role` 列。Tortoise 的 `generate_schemas(safe=True)` 只会安全创建缺失的表，不会修改已有表结构，所以后端启动流程现在包含一个显式、幂等的升级步骤：
+
+```sql
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "role" VARCHAR(32);
+UPDATE "users" SET "role" = 'user' WHERE "role" IS NULL;
+ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'user';
+ALTER TABLE "users" ALTER COLUMN "role" SET NOT NULL;
+```
+
+升级会在后端连接数据库并完成安全建表之后、管理员账号种子逻辑之前执行。已有用户行会保留，缺失的 `role` 会回填为 `user`；如果 `.env` 中配置了 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD`，管理员种子逻辑随后会把该账号的 `role` 设置为 `admin`。
+
+已有环境升级步骤：
+
+```powershell
+docker compose pull
+docker compose up --build -d backend
+docker compose logs -f backend
+```
+
+建议在生产环境升级前备份 PostgreSQL 数据库。升级 SQL 可重复执行；新数据库会直接按当前模型创建 `role` 列，旧数据库会在首次启动新后端时补齐并回填。
 
 ### 停止服务
 
@@ -394,3 +428,15 @@ Invoke-WebRequest -UseBasicParsing `
   -ContentType "application/json" `
   -Body '{"username":"<your-username>","password":"<your-password>"}'
 ```
+
+默认注册接口应被禁用：
+
+```powershell
+Invoke-WebRequest -UseBasicParsing `
+  -Method Post `
+  -Uri http://localhost:3000/api/v1/auth/register `
+  -ContentType "application/json" `
+  -Body '{"username":"local-user","password":"local-password"}'
+```
+
+需要本地注册时，先在 `.env` 中设置 `ENABLE_SELF_REGISTRATION=true` 和 `NEXT_PUBLIC_ENABLE_SELF_REGISTRATION=true`，再重新构建/启动。

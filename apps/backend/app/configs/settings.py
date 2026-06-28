@@ -31,6 +31,7 @@ class Settings(BaseSettings):
 
     admin_username: str | None = Field(default=None, min_length=3, max_length=64)
     admin_password: SecretStr | None = Field(default=None, min_length=6, max_length=128)
+    enable_self_registration: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",

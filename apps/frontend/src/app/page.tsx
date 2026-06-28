@@ -1,43 +1,57 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { FormEvent, ReactElement } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { establishSession, login, register } from "@/api/auth";
+import { clearSession, establishSession, login, register } from "@/api/auth";
 import { getCurrentUser } from "@/api/user";
-import { TOKEN_STORAGE_KEY } from "@/api/client";
+import { env } from "@/configs/env";
 import { getHttpErrorMessage } from "@/types/http";
 
-export default function Home() {
+export default function Home(): ReactElement {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState(
-    "请输入 .env 中配置的管理员账号，或为本地开发创建一个新账号。"
+    env.enableSelfRegistration
+      ? "请输入 .env 中配置的管理员账号，或为本地开发创建一个新账号。"
+      : "请输入 .env 中配置的管理员账号。"
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  async function clearSessionSilently(): Promise<void> {
+    try {
+      await clearSession();
+    } catch {
+      return;
+    }
+  }
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setIsLoading(true);
 
     try {
       const response = await login({ username, password });
-      window.localStorage.setItem(TOKEN_STORAGE_KEY, response.data.access_token);
-      await getCurrentUser();
       await establishSession(response.data.access_token);
+      await getCurrentUser();
       setMessage("登录成功，正在进入 Hyperspace 控制台");
       router.push("/dashboard");
     } catch (error) {
-      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      await clearSessionSilently();
       setMessage(getHttpErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleRegister() {
+  async function handleRegister(): Promise<void> {
+    if (!env.enableSelfRegistration) {
+      setMessage("本地账号创建未启用。");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -120,14 +134,16 @@ export default function Home() {
             {isLoading ? "处理中..." : "登录 Hyperspace"}
           </button>
 
-          <button
-            className="secondary-button"
-            disabled={isLoading}
-            type="button"
-            onClick={handleRegister}
-          >
-            创建本地账号
-          </button>
+          {env.enableSelfRegistration ? (
+            <button
+              className="secondary-button"
+              disabled={isLoading}
+              type="button"
+              onClick={handleRegister}
+            >
+              创建本地账号
+            </button>
+          ) : null}
         </form>
 
         <div className="message-box">

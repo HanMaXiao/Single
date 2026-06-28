@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
+from app.configs.settings import settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User
 from app.schemas.base import ApiResponse, ok
@@ -10,7 +11,13 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=ApiResponse[UserOut])
-async def register(payload: RegisterRequest):
+async def register(payload: RegisterRequest) -> ApiResponse[UserOut]:
+    if not settings.enable_self_registration:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Self-registration is disabled",
+        )
+
     existing = await User.filter(username=payload.username).first()
     if existing is not None:
         raise HTTPException(status_code=400, detail="Username already exists")
@@ -23,7 +30,7 @@ async def register(payload: RegisterRequest):
 
 
 @router.post("/login", response_model=ApiResponse[TokenData])
-async def login(payload: LoginRequest):
+async def login(payload: LoginRequest) -> ApiResponse[TokenData]:
     user = await User.filter(username=payload.username, is_active=True).first()
     if user is None or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid username or password")
