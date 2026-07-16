@@ -9,7 +9,9 @@ class Product(Model):
     project_id = fields.IntField(index=True, description="所属项目ID")
     name = fields.CharField(max_length=128, description="商品名称")
     description = fields.TextField(null=True, description="商品说明")
-    status = fields.CharEnumField(ProductStatus, max_length=16, default=ProductStatus.DRAFT, description="商品状态")
+    status = fields.CharEnumField(
+        ProductStatus, max_length=16, default=ProductStatus.DRAFT, description="商品状态"
+    )
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
     updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
     deleted_at = fields.DatetimeField(null=True, description="软删除时间")
@@ -27,7 +29,9 @@ class Sku(Model):
     price_cents = fields.IntField(description="价格，单位分")
     deposit_cents = fields.IntField(default=0, description="押金，单位分")
     stock_limit = fields.IntField(null=True, description="可售库存上限")
-    status = fields.CharEnumField(ProductStatus, max_length=16, default=ProductStatus.ACTIVE, description="SKU 状态")
+    status = fields.CharEnumField(
+        ProductStatus, max_length=16, default=ProductStatus.ACTIVE, description="SKU 状态"
+    )
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
     updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
     deleted_at = fields.DatetimeField(null=True, description="软删除时间")

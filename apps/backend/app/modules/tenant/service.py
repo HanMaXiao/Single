@@ -1,5 +1,11 @@
 from app.modules.tenant import repository
-from app.modules.tenant.schemas import CompanyCreate, CompanyOut, CurrentProjectOut, ModuleInfoOut, ProjectOut
+from app.modules.tenant.schemas import (
+    CompanyCreate,
+    CompanyOut,
+    CurrentProjectOut,
+    ModuleInfoOut,
+    ProjectOut,
+)
 
 
 def get_module_info() -> ModuleInfoOut:

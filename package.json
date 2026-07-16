@@ -1,23 +1,26 @@
 {
-  "name": "fastapi-next-monorepo",
-  "version": "0.1.0",
-  "private": true,
-  "packageManager": "pnpm@11.13.1",
-  "workspaces": [
-    "apps/web",
-    "apps/admin",
-    "packages/*"
-  ],
-  "scripts": {
-    "api:openapi": "node scripts/run-python.mjs apps/backend/scripts/export_openapi.py",
-    "api:generate": "pnpm api:openapi && pnpm --filter next-frontend api:generate",
-    "api:check": "pnpm api:generate && git diff --exit-code -- apps/frontend/src/api/generated/openapi.json apps/frontend/src/api/generated/schema.ts",
-    "dev": "turbo run dev --parallel",
-    "build": "turbo run build",
-    "start": "turbo run start",
-    "lint": "turbo run lint"
-  },
-  "devDependencies": {
-    "turbo": "2.3.3"
-  }
+	"name": "fastapi-next-monorepo",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "pnpm@11.13.1",
+	"workspaces": [
+		"apps/web",
+		"apps/admin",
+		"packages/*"
+	],
+	"scripts": {
+		"api:openapi": "node scripts/run-python.mjs apps/backend/scripts/export_openapi.py",
+		"api:generate": "pnpm api:openapi && pnpm --filter next-frontend api:generate",
+		"dev": "turbo run dev --parallel",
+		"build": "turbo run build",
+		"start": "turbo run start",
+		"lint": "biome lint .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"check": "biome check --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.4",
+		"turbo": "2.3.3"
+	}
 }

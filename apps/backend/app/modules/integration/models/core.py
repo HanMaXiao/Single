@@ -23,7 +23,9 @@ class WebhookEvent(Model):
     id = fields.IntField(pk=True, description="Webhook 事件ID")
     provider = fields.CharEnumField(IntegrationProvider, max_length=32, description="来源提供方")
     event_key = fields.CharField(max_length=128, index=True, description="事件键")
-    status = fields.CharEnumField(WebhookStatus, max_length=16, default=WebhookStatus.RECEIVED, description="处理状态")
+    status = fields.CharEnumField(
+        WebhookStatus, max_length=16, default=WebhookStatus.RECEIVED, description="处理状态"
+    )
     payload = fields.JSONField(default=dict, description="事件原始数据")
     received_at = fields.DatetimeField(auto_now_add=True, description="接收时间")
     processed_at = fields.DatetimeField(null=True, description="处理时间")

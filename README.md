@@ -17,6 +17,8 @@
 | 数据库 | PostgreSQL 16 | 主关系型数据库 |
 | 缓存 | Redis 7 | 可选服务，默认不启动 |
 | 容器 | Docker Compose | 一键构建与启动 |
+| 前端格式化/Lint | Biome 2.5 | 替代 ESLint + Prettier，覆盖 JS/TS/JSX/CSS |
+| Python 格式化 | Black 25.1 | PEP 8 兼容的 Python 代码格式化
 
 ## 目录结构
 
@@ -240,6 +242,39 @@ Admin 构建：
 
 ```powershell
 pnpm build --filter=@cultural-tourism/admin
+```
+
+## 代码格式化与 Lint
+
+### 前端 (Biome)
+
+前端项目使用 Biome 统一格式化和 lint，替代 ESLint + Prettier。
+
+**配置**：根目录 [biome.json](file:///d:/XiaoProject/Single/biome.json)
+
+```powershell
+# 格式检查
+pnpm lint                    # biome lint .
+
+# 格式化 + Lint 修复 + 自动整理 import
+pnpm check                   # biome check --write .
+
+# 仅格式化
+pnpm format                  # biome format --write .
+```
+
+### 后端 (Black)
+
+后端 Python 代码使用 Black 格式化，配置见 [apps/backend/pyproject.toml](file:///d:/XiaoProject/Single/apps/backend/pyproject.toml)。
+
+```powershell
+cd apps/backend
+
+# 检查格式（CI 用）
+black --check .
+
+# 自动格式化
+black .
 ```
 
 ## 前后端接口关系

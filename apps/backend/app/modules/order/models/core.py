@@ -9,7 +9,9 @@ class RentalOrder(Model):
     order_no = fields.CharField(max_length=64, unique=True, index=True, description="订单号")
     project_id = fields.IntField(index=True, description="所属项目ID")
     user_id = fields.IntField(null=True, index=True, description="游客用户ID")
-    status = fields.CharEnumField(OrderStatus, max_length=24, default=OrderStatus.PENDING_PAYMENT, description="订单状态")
+    status = fields.CharEnumField(
+        OrderStatus, max_length=24, default=OrderStatus.PENDING_PAYMENT, description="订单状态"
+    )
     total_amount_cents = fields.IntField(default=0, description="订单总金额，单位分")
     deposit_amount_cents = fields.IntField(default=0, description="押金金额，单位分")
     paid_at = fields.DatetimeField(null=True, description="支付时间")
@@ -62,7 +64,9 @@ class ServiceEntitlement(Model):
     user_id = fields.IntField(null=True, index=True, description="游客用户ID")
     project_id = fields.IntField(index=True, description="所属项目ID")
     entitlement_type = fields.CharEnumField(EntitlementType, max_length=24, description="权益类型")
-    status = fields.CharEnumField(EntitlementStatus, max_length=16, default=EntitlementStatus.ACTIVE, description="权益状态")
+    status = fields.CharEnumField(
+        EntitlementStatus, max_length=16, default=EntitlementStatus.ACTIVE, description="权益状态"
+    )
     valid_from = fields.DatetimeField(null=True, description="权益生效时间")
     valid_until = fields.DatetimeField(null=True, description="权益到期时间")
     device_id = fields.IntField(null=True, index=True, description="绑定设备资产ID")

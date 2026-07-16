@@ -10,7 +10,9 @@ class DeviceBinding(Model):
     order_id = fields.IntField(index=True, description="订单ID")
     device_id = fields.IntField(index=True, description="设备资产ID")
     device_sn = fields.CharField(max_length=64, index=True, description="设备 SN")
-    status = fields.CharEnumField(BindingStatus, max_length=16, default=BindingStatus.BOUND, description="绑定状态")
+    status = fields.CharEnumField(
+        BindingStatus, max_length=16, default=BindingStatus.BOUND, description="绑定状态"
+    )
     bound_at = fields.DatetimeField(auto_now_add=True, description="绑定时间")
     unbound_at = fields.DatetimeField(null=True, description="解绑时间")
     operator_user_id = fields.IntField(null=True, description="操作人员ID")
@@ -58,7 +60,9 @@ class DeviceFaultLog(Model):
     project_id = fields.IntField(index=True, description="所属项目ID")
     device_id = fields.IntField(index=True, description="设备资产ID")
     device_sn = fields.CharField(max_length=64, index=True, description="设备 SN")
-    status = fields.CharEnumField(FaultStatus, max_length=16, default=FaultStatus.OPEN, description="故障处理状态")
+    status = fields.CharEnumField(
+        FaultStatus, max_length=16, default=FaultStatus.OPEN, description="故障处理状态"
+    )
     description = fields.TextField(description="故障描述")
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
     resolved_at = fields.DatetimeField(null=True, description="解决时间")

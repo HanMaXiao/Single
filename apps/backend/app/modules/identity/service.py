@@ -1,6 +1,11 @@
 from app.modules.identity.models import User
 from app.modules.identity import repository
-from app.modules.identity.schemas import AdminUserOut, CurrentIdentityOut, DataScopeOut, ModuleInfoOut
+from app.modules.identity.schemas import (
+    AdminUserOut,
+    CurrentIdentityOut,
+    DataScopeOut,
+    ModuleInfoOut,
+)
 
 
 def get_module_info() -> ModuleInfoOut:

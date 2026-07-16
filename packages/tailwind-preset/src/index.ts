@@ -1,9 +1,9 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
 const preset: Partial<Config> = {
-  theme: {
-    extend: {},
-  },
+	theme: {
+		extend: {},
+	},
 };
 
 export default preset;

@@ -22,4 +22,3 @@ errorlog = os.getenv("GUNICORN_ERROR_LOG", "-")
 loglevel = os.getenv("GUNICORN_LOG_LEVEL", "info")
 
 forwarded_allow_ips = os.getenv("FORWARDED_ALLOW_IPS", "*")
-

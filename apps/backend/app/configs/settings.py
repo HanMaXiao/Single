@@ -44,9 +44,7 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def validate_admin_seed_settings(self) -> Self:
         if (self.admin_username is None) != (self.admin_password is None):
-            raise ValueError(
-                "ADMIN_USERNAME and ADMIN_PASSWORD must be set together"
-            )
+            raise ValueError("ADMIN_USERNAME and ADMIN_PASSWORD must be set together")
 
         return self
 
@@ -66,8 +64,7 @@ class Settings(BaseSettings):
                 if value is None
             ]
             raise ValueError(
-                "Missing required database environment variables: "
-                + ", ".join(missing_settings)
+                "Missing required database environment variables: " + ", ".join(missing_settings)
             )
 
         username = quote_plus(postgres_user)

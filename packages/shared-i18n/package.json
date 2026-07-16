@@ -1,17 +1,17 @@
 {
-  "name": "@cultural-tourism/shared-i18n",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./i18n": "./src/i18n.ts",
-    "./locale-guard": "./src/locale-guard.ts",
-    "./locales/*": "./src/locales/*"
-  },
-  "dependencies": {
-    "i18next": "^23.16.0",
-    "react-i18next": "^15.1.0"
-  }
+	"name": "@cultural-tourism/shared-i18n",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./i18n": "./src/i18n.ts",
+		"./locale-guard": "./src/locale-guard.ts",
+		"./locales/*": "./src/locales/*"
+	},
+	"dependencies": {
+		"i18next": "^23.16.0",
+		"react-i18next": "^15.1.0"
+	}
 }

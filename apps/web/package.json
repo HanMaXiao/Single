@@ -1,28 +1,28 @@
 {
-  "name": "next-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "api:generate": "openapi-typescript src/api/generated/openapi.json --output src/api/generated/schema.ts",
-    "dev": "pnpm --workspace-root api:generate && next dev --turbo --port 3100",
-    "build": "pnpm --workspace-root api:generate && next build",
-    "start": "next start --port 3100",
-    "lint": "pnpm --workspace-root api:check && next lint"
-  },
-  "dependencies": {
-    "next": "16.2.10",
-    "openapi-ts-fetch": "2.2.0",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "zod": "3.24.1"
-  },
-  "devDependencies": {
-    "@types/node": "22.10.7",
-    "@types/react": "19.2.3",
-    "@types/react-dom": "19.2.3",
-    "eslint": "9.18.0",
-    "eslint-config-next": "16.2.10",
-    "openapi-typescript": "7.13.0",
-    "typescript": "5.7.3"
-  }
+	"name": "next-frontend",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"api:generate": "openapi-typescript src/api/generated/openapi.json --output src/api/generated/schema.ts",
+		"dev": "pnpm --workspace-root api:generate && next dev --turbo --port 3100",
+		"build": "pnpm --workspace-root api:generate && next build",
+		"start": "next start --port 3100",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write ."
+	},
+	"dependencies": {
+		"next": "16.2.10",
+		"openapi-ts-fetch": "2.2.0",
+		"react": "19.2.7",
+		"react-dom": "19.2.7",
+		"zod": "3.24.1"
+	},
+	"devDependencies": {
+		"@types/node": "22.10.7",
+		"@types/react": "19.2.3",
+		"@types/react-dom": "19.2.3",
+		"openapi-typescript": "7.13.0",
+		"typescript": "5.7.3"
+	}
 }
