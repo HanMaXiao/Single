@@ -2,9 +2,11 @@
   "name": "fastapi-next-monorepo",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@11.13.1",
   "workspaces": [
-    "apps/frontend"
+    "apps/web",
+    "apps/admin",
+    "packages/*"
   ],
   "scripts": {
     "api:openapi": "node scripts/run-python.mjs apps/backend/scripts/export_openapi.py",
