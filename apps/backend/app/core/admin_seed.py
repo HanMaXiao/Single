@@ -1,6 +1,6 @@
 from app.configs.settings import settings
 from app.core.security import hash_password, verify_password
-from app.models.user import User
+from app.modules.identity.models import User
 
 
 async def seed_admin_user_from_environment() -> User | None:

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.middleware.auth import require_auth
-from app.models.user import User
+from app.modules.identity.models import User
 from app.schemas.base import ApiResponse, ok
 from app.schemas.user import UserOut
 

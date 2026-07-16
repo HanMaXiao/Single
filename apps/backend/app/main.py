@@ -13,6 +13,7 @@ from app.core.bootstrap import bootstrap_backend
 from app.core.database import close_database
 from app.middleware.auth import AuthTokenMiddleware
 from app.middleware.request_log import RequestLogMiddleware
+from app.modules.registry import get_routers
 
 
 logging.basicConfig(
@@ -59,6 +60,8 @@ app.add_middleware(RequestLogMiddleware)
 app.include_router(health.router, prefix=settings.api_v1_prefix)
 app.include_router(auth.router, prefix=settings.api_v1_prefix)
 app.include_router(users.router, prefix=settings.api_v1_prefix)
+for module_router in get_routers():
+    app.include_router(module_router, prefix=settings.api_v1_prefix)
 
 
 if __name__ == "__main__":

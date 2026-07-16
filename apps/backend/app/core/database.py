@@ -2,6 +2,7 @@ from tortoise import Tortoise
 
 from app.configs.settings import settings
 from app.core.database_upgrades import apply_database_upgrades
+from app.modules.registry import get_model_modules
 
 
 def get_tortoise_orm_config() -> dict[str, object]:
@@ -9,7 +10,7 @@ def get_tortoise_orm_config() -> dict[str, object]:
         "connections": {"default": settings.database_url},
         "apps": {
             "models": {
-                "models": ["app.models.user"],
+                "models": get_model_modules(),
                 "default_connection": "default",
             }
         },

@@ -1,0 +1,1 @@
+"""Project asset inventory module."""

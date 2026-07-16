@@ -4,7 +4,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
 from app.core.security import decode_access_token
-from app.models.user import User
+from app.modules.identity.models import User
 
 
 bearer_scheme = HTTPBearer(auto_error=False)

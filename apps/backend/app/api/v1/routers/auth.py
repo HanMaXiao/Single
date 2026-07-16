@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.configs.settings import settings
 from app.core.security import create_access_token, hash_password, verify_password
-from app.models.user import User
+from app.modules.identity.models import User
 from app.schemas.base import ApiResponse, ok
 from app.schemas.user import LoginRequest, RegisterRequest, TokenData, UserOut
 
